@@ -1,5 +1,5 @@
 # Cydiacmyk.github.io
-<!DOCTYPE html>
+<欢迎来到我做的网站>
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
@@ -18,7 +18,24 @@
   // 自适应窗口尺寸
   function resize() {
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.height = window.innerHeight;<script>
+(() => {
+  'use strict';
+  // ... 上面原有代码全保留 ...
+  document.addEventListener('visibilitychange', () => {
+    document.hidden ? cancelAnimationFrame(rafId) : rafId = requestAnimationFrame(frame);
+  });
+
+  // 👇 就加这四行，在最底下
+  // 修复底部不反弹（横竖屏/地址栏显隐导致的边界计算错误）
+  window.addEventListener('orientationchange', () => setTimeout(resize, 50));
+  window.addEventListener('scroll', () => { W = window.innerWidth; H = window.innerHeight; });
+
+  // 接收代理配置（后续枪战直接用，不用改原逻辑）
+  window.__PROXY_PREFIX__ = window.__PROXY_PREFIX__ || '';
+  window.__WS_PATH__ = window.__WS_PATH__ || '/ws';
+})();
+</script>
   }
   resize();
   window.addEventListener('resize', resize);
