@@ -33,9 +33,50 @@ body{background:#1a1a2e;height:100vh;overflow:hidden}
   <div class=icon onclick="openApp('game')"><span>🎮</span><div>射击游戏</div></div>
 </div>
 
-<div id=taskbar></div>
-// ===== 射击游戏应用 =====
-function initGame(win){
+<div id=taskbar></div
+<script>
+var z=10,wins={};
+function openApp(id){
+  if(wins[id]){show(id);return}
+  var cfg={terminal:'终端',about:'关于'}[id],html='';
+  if(id==='terminal')html=`<div class="terminal" id="tout">MicroOS Terminal v1.3\n输入 help 查看命令\n\n$</div><div class="term-input"><span>$</span><input id="tin" autocomplete="off"></div>`;
+  if(id==='about')html=`<div style="color:#0f6;line-height:1.8"><b>MicroOS v1.3</b><br>纯前端仿操作系统<br>零依赖 · 单文件<br><br>终端彩蛋：输入 secret</div>`;
+  var w=document.createElement('div');w.className='window';
+  w.innerHTML=`<div class="win-title"><span>${cfg}</span><span class="win-close" onclick="closeApp('${id}')">×</span></div><div class="win-content">${html}</div>`;
+  w.style.left=80+Object.keys(wins).length*40+'px';
+  w.style.top=60+Object.keys(wins).length*40+'px';
+  w.style.zIndex=++z;document.body.appendChild(w);wins[id]={el:w,title:cfg};
+  var b=document.createElement('div');b.className='task-btn active';b.textContent=cfg;b.dataset.id=id;
+  b.onclick=()=>{wins[id].el.style.display==='none'?show(id):closeApp(id)};
+  document.getElementById('taskbar').appendChild(b);
+  show(id);
+  if(id==='terminal')initTerm();
+}
+
+function show(id){wins[id].el.style.display='flex';wins[id].el.style.zIndex=++z;updateBtns()}
+function closeApp(id){if(wins[id]){wins[id].el.style.display='none';updateBtns()}}
+function updateBtns(){document.querySelectorAll('.task-btn').forEach(function(b){var id=b.dataset.id;b.classList.toggle('active',wins[id]&&wins[id].el.style.display!=='none')})}
+
+function initTerm(){
+  var out=document.getElementById('tout'),inp=document.getElementById('tin');
+  inp.focus();
+  inp.onkeydown=function(e){
+    if(e.key!=='Enter')return;
+    var cmd=inp.value.trim().toLowerCase();out.innerHTML+=cmd+'\n';inp.value='';
+    var r='';
+    if(cmd==='help')r='help   - 帮助\nclear  - 清屏\ntime   - 当前时间\nabout  - 关于系统\nsecret - 彩蛋';
+    else if(cmd==='clear')r='__CLEAR__';
+    else if(cmd==='time')r=new Date().toLocaleString();
+    else if(cmd==='about'){openApp('about');r='打开关于...'}
+    else if(cmd==='secret')r='🎉 致敬速通玩家！';
+    else if(cmd==='')r='';
+    else r='未知命令，输入 help';
+    if(r==='__CLEAR__')out.innerHTML='';else out.innerHTML+=r+'\n\n$';
+    out.scrollTop=out.scrollHeight;inp.focus();
+  };
+  wins.terminal.el.onclick=()=>inp.focus();
+}
+</script>
   var c=win.querySelector('canvas'),x=c.getContext('2d');
   var W=c.width=c.clientWidth,H=c.height=c.clientHeight,M=Math;
   var px=W/2,py=H-120,mx=W/2,my=H/2;
@@ -109,12 +150,8 @@ function initGame(win){
     for(var i=parts.length-1;i>=0;i--){var p=parts[i];p.x+=p.vx;p.y+=p.vy;p.l--;x.globalAlpha=p.l/15;x.fillStyle='#ff0';x.fillRect(p.x,p.y,3,3);x.globalAlpha=1;if(p.l<=0)parts.splice(i,1);}
 
     // HUD
-    x.fillStyle='#0f6';x.font='16px monospace';x.fillText(`❤️${hp} 🎯${sc}`,10,30);
-  }
+    x.fillStyle='#0f6';x.font='16px monospace';x.fillText(`❤️${hp} 🎯${sc}`,10,30)
   loop();
-}
-
-// 修改 openApp 函数，加入 game 分支
 var _openApp=openApp;
 window.openApp=function(id){
   if(id==='game'){
@@ -126,49 +163,5 @@ window.openApp=function(id){
   }
   _openApp(id);
 }
-<script>
-var z=10,wins={};
-
-function openApp(id){
-  if(wins[id]){show(id);return}
-  var cfg={terminal:'终端',about:'关于'}[id],html='';
-  if(id==='terminal')html=`<div class="terminal" id="tout">MicroOS Terminal v1.3\n输入 help 查看命令\n\n$</div><div class="term-input"><span>$</span><input id="tin" autocomplete="off"></div>`;
-  if(id==='about')html=`<div style="color:#0f6;line-height:1.8"><b>MicroOS v1.3</b><br>纯前端仿操作系统<br>零依赖 · 单文件<br><br>终端彩蛋：输入 secret</div>`;
-  var w=document.createElement('div');w.className='window';
-  w.innerHTML=`<div class="win-title"><span>${cfg}</span><span class="win-close" onclick="closeApp('${id}')">×</span></div><div class="win-content">${html}</div>`;
-  w.style.left=80+Object.keys(wins).length*40+'px';
-  w.style.top=60+Object.keys(wins).length*40+'px';
-  w.style.zIndex=++z;document.body.appendChild(w);wins[id]={el:w,title:cfg};
-  var b=document.createElement('div');b.className='task-btn active';b.textContent=cfg;b.dataset.id=id;
-  b.onclick=()=>{wins[id].el.style.display==='none'?show(id):closeApp(id)};
-  document.getElementById('taskbar').appendChild(b);
-  show(id);
-  if(id==='terminal')initTerm();
-}
-
-function show(id){wins[id].el.style.display='flex';wins[id].el.style.zIndex=++z;updateBtns()}
-function closeApp(id){if(wins[id]){wins[id].el.style.display='none';updateBtns()}}
-function updateBtns(){document.querySelectorAll('.task-btn').forEach(function(b){var id=b.dataset.id;b.classList.toggle('active',wins[id]&&wins[id].el.style.display!=='none')})}
-
-function initTerm(){
-  var out=document.getElementById('tout'),inp=document.getElementById('tin');
-  inp.focus();
-  inp.onkeydown=function(e){
-    if(e.key!=='Enter')return;
-    var cmd=inp.value.trim().toLowerCase();out.innerHTML+=cmd+'\n';inp.value='';
-    var r='';
-    if(cmd==='help')r='help   - 帮助\nclear  - 清屏\ntime   - 当前时间\nabout  - 关于系统\nsecret - 彩蛋';
-    else if(cmd==='clear')r='__CLEAR__';
-    else if(cmd==='time')r=new Date().toLocaleString();
-    else if(cmd==='about'){openApp('about');r='打开关于...'}
-    else if(cmd==='secret')r='🎉 致敬速通玩家！';
-    else if(cmd==='')r='';
-    else r='未知命令，输入 help';
-    if(r==='__CLEAR__')out.innerHTML='';else out.innerHTML+=r+'\n\n$';
-    out.scrollTop=out.scrollHeight;inp.focus();
-  };
-  wins.terminal.el.onclick=()=>inp.focus();
-}
-</script>
 </body>
 </html>
